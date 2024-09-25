@@ -5,6 +5,936 @@ Through this analysis, key questions can be answered, such as identifying the mo
 and guest satisfaction levels. Techniques such as descriptive statistics, data visualization, and machine learning models are used to uncover trends, optimize pricing, 
 improve customer experiences.
 
+In [4]:
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+warnings.filterwarnings('ignore')
+%matplotlib inline
+In [5]:
+Airbnb_df=pd.read_csv("Airbnb_data.csv")
+In [6]:
+Airbnb_df.head(5)
+Out[6]:
+	id	name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	number_of_reviews	last_review	reviews_per_month	calculated_host_listings_count	availability_365
+0	2539	Clean & quiet apt home by the park	2787	John	Brooklyn	Kensington	40.64749	-73.97237	Private room	149	1	9	19-10-2018	0.21	6	365
+1	2595	Skylit Midtown Castle	2845	Jennifer	Manhattan	Midtown	40.75362	-73.98377	Entire home/apt	225	1	45	21-05-2019	0.38	2	355
+2	3647	THE VILLAGE OF HARLEM....NEW YORK !	4632	Elisabeth	Manhattan	Harlem	40.80902	-73.94190	Private room	150	3	0	NaN	NaN	1	365
+3	3831	Cozy Entire Floor of Brownstone	4869	LisaRoxanne	Brooklyn	Clinton Hill	40.68514	-73.95976	Entire home/apt	89	1	270	05-07-2019	4.64	1	194
+4	5022	Entire Apt: Spacious Studio/Loft by central park	7192	Laura	Manhattan	East Harlem	40.79851	-73.94399	Entire home/apt	80	10	9	19-11-2018	0.10	1	0
+In [7]:
+Airbnb_df.shape
+Out[7]:
+(48895, 16)
+In [8]:
+Airbnb_df.info
+Out[8]:
+<bound method DataFrame.info of              id                                               name   host_id  \
+0          2539                 Clean & quiet apt home by the park      2787   
+1          2595                              Skylit Midtown Castle      2845   
+2          3647                THE VILLAGE OF HARLEM....NEW YORK !      4632   
+3          3831                    Cozy Entire Floor of Brownstone      4869   
+4          5022   Entire Apt: Spacious Studio/Loft by central park      7192   
+...         ...                                                ...       ...   
+48890  36484665    Charming one bedroom - newly renovated rowhouse   8232441   
+48891  36485057      Affordable room in Bushwick/East Williamsburg   6570630   
+48892  36485431            Sunny Studio at Historical Neighborhood  23492952   
+48893  36485609               43rd St. Time Square-cozy single bed  30985759   
+48894  36487245  Trendy duplex in the very heart of Hell's Kitchen  68119814   
+
+           host_name neighbourhood_group       neighbourhood  latitude  \
+0               John            Brooklyn          Kensington  40.64749   
+1           Jennifer           Manhattan             Midtown  40.75362   
+2          Elisabeth           Manhattan              Harlem  40.80902   
+3        LisaRoxanne            Brooklyn        Clinton Hill  40.68514   
+4              Laura           Manhattan         East Harlem  40.79851   
+...              ...                 ...                 ...       ...   
+48890        Sabrina            Brooklyn  Bedford-Stuyvesant  40.67853   
+48891        Marisol            Brooklyn            Bushwick  40.70184   
+48892  Ilgar & Aysel           Manhattan              Harlem  40.81475   
+48893            Taz           Manhattan      Hell's Kitchen  40.75751   
+48894     Christophe           Manhattan      Hell's Kitchen  40.76404   
+
+       longitude        room_type  price  minimum_nights  number_of_reviews  \
+0      -73.97237     Private room    149               1                  9   
+1      -73.98377  Entire home/apt    225               1                 45   
+2      -73.94190     Private room    150               3                  0   
+3      -73.95976  Entire home/apt     89               1                270   
+4      -73.94399  Entire home/apt     80              10                  9   
+...          ...              ...    ...             ...                ...   
+48890  -73.94995     Private room     70               2                  0   
+48891  -73.93317     Private room     40               4                  0   
+48892  -73.94867  Entire home/apt    115              10                  0   
+48893  -73.99112      Shared room     55               1                  0   
+48894  -73.98933     Private room     90               7                  0   
+
+      last_review  reviews_per_month  calculated_host_listings_count  \
+0      19-10-2018               0.21                               6   
+1      21-05-2019               0.38                               2   
+2             NaN                NaN                               1   
+3      05-07-2019               4.64                               1   
+4      19-11-2018               0.10                               1   
+...           ...                ...                             ...   
+48890         NaN                NaN                               2   
+48891         NaN                NaN                               2   
+48892         NaN                NaN                               1   
+48893         NaN                NaN                               6   
+48894         NaN                NaN                               1   
+
+       availability_365  
+0                   365  
+1                   355  
+2                   365  
+3                   194  
+4                     0  
+...                 ...  
+48890                 9  
+48891                36  
+48892                27  
+48893                 2  
+48894                23  
+
+[48895 rows x 16 columns]>
+In [9]:
+Airbnb_df.isnull().sum()      
+Out[9]:
+id                                    0
+name                                 16
+host_id                               0
+host_name                            21
+neighbourhood_group                   0
+neighbourhood                         0
+latitude                              0
+longitude                             0
+room_type                             0
+price                                 0
+minimum_nights                        0
+number_of_reviews                     0
+last_review                       10052
+reviews_per_month                 10052
+calculated_host_listings_count        0
+availability_365                      0
+dtype: int64
+In [10]:
+Airbnb_df.head()
+Out[10]:
+	id	name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	number_of_reviews	last_review	reviews_per_month	calculated_host_listings_count	availability_365
+0	2539	Clean & quiet apt home by the park	2787	John	Brooklyn	Kensington	40.64749	-73.97237	Private room	149	1	9	19-10-2018	0.21	6	365
+1	2595	Skylit Midtown Castle	2845	Jennifer	Manhattan	Midtown	40.75362	-73.98377	Entire home/apt	225	1	45	21-05-2019	0.38	2	355
+2	3647	THE VILLAGE OF HARLEM....NEW YORK !	4632	Elisabeth	Manhattan	Harlem	40.80902	-73.94190	Private room	150	3	0	NaN	NaN	1	365
+3	3831	Cozy Entire Floor of Brownstone	4869	LisaRoxanne	Brooklyn	Clinton Hill	40.68514	-73.95976	Entire home/apt	89	1	270	05-07-2019	4.64	1	194
+4	5022	Entire Apt: Spacious Studio/Loft by central park	7192	Laura	Manhattan	East Harlem	40.79851	-73.94399	Entire home/apt	80	10	9	19-11-2018	0.10	1	0
+In [11]:
+Airbnb_df.tail()
+Out[11]:
+	id	name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	number_of_reviews	last_review	reviews_per_month	calculated_host_listings_count	availability_365
+48890	36484665	Charming one bedroom - newly renovated rowhouse	8232441	Sabrina	Brooklyn	Bedford-Stuyvesant	40.67853	-73.94995	Private room	70	2	0	NaN	NaN	2	9
+48891	36485057	Affordable room in Bushwick/East Williamsburg	6570630	Marisol	Brooklyn	Bushwick	40.70184	-73.93317	Private room	40	4	0	NaN	NaN	2	36
+48892	36485431	Sunny Studio at Historical Neighborhood	23492952	Ilgar & Aysel	Manhattan	Harlem	40.81475	-73.94867	Entire home/apt	115	10	0	NaN	NaN	1	27
+48893	36485609	43rd St. Time Square-cozy single bed	30985759	Taz	Manhattan	Hell's Kitchen	40.75751	-73.99112	Shared room	55	1	0	NaN	NaN	6	2
+48894	36487245	Trendy duplex in the very heart of Hell's Kitchen	68119814	Christophe	Manhattan	Hell's Kitchen	40.76404	-73.98933	Private room	90	7	0	NaN	NaN	1	23
+In [12]:
+Airbnb_df.head().T
+Out[12]:
+	0	1	2	3	4
+id	2539	2595	3647	3831	5022
+name	Clean & quiet apt home by the park	Skylit Midtown Castle	THE VILLAGE OF HARLEM....NEW YORK !	Cozy Entire Floor of Brownstone	Entire Apt: Spacious Studio/Loft by central park
+host_id	2787	2845	4632	4869	7192
+host_name	John	Jennifer	Elisabeth	LisaRoxanne	Laura
+neighbourhood_group	Brooklyn	Manhattan	Manhattan	Brooklyn	Manhattan
+neighbourhood	Kensington	Midtown	Harlem	Clinton Hill	East Harlem
+latitude	40.64749	40.75362	40.80902	40.68514	40.79851
+longitude	-73.97237	-73.98377	-73.9419	-73.95976	-73.94399
+room_type	Private room	Entire home/apt	Private room	Entire home/apt	Entire home/apt
+price	149	225	150	89	80
+minimum_nights	1	1	3	1	10
+number_of_reviews	9	45	0	270	9
+last_review	19-10-2018	21-05-2019	NaN	05-07-2019	19-11-2018
+reviews_per_month	0.21	0.38	NaN	4.64	0.1
+calculated_host_listings_count	6	2	1	1	1
+availability_365	365	355	365	194	0
+In [13]:
+Airbnb_df.columns
+Out[13]:
+Index(['id', 'name', 'host_id', 'host_name', 'neighbourhood_group',
+       'neighbourhood', 'latitude', 'longitude', 'room_type', 'price',
+       'minimum_nights', 'number_of_reviews', 'last_review',
+       'reviews_per_month', 'calculated_host_listings_count',
+       'availability_365'],
+      dtype='object')
+In [14]:
+rename_col={"id":"listing_id",'name':'listing_name','number_of_reviews':'total_reviews','calculated_host_listings_count':'host_listings_count'}
+In [15]:
+Airbnb_df=Airbnb_df.rename(columns=rename_col)
+Airbnb_df.head(2)
+Out[15]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	last_review	reviews_per_month	host_listings_count	availability_365
+0	2539	Clean & quiet apt home by the park	2787	John	Brooklyn	Kensington	40.64749	-73.97237	Private room	149	1	9	19-10-2018	0.21	6	365
+1	2595	Skylit Midtown Castle	2845	Jennifer	Manhattan	Midtown	40.75362	-73.98377	Entire home/apt	225	1	45	21-05-2019	0.38	2	355
+In [16]:
+Airbnb_df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 48895 entries, 0 to 48894
+Data columns (total 16 columns):
+ #   Column               Non-Null Count  Dtype  
+---  ------               --------------  -----  
+ 0   listing_id           48895 non-null  int64  
+ 1   listing_name         48879 non-null  object 
+ 2   host_id              48895 non-null  int64  
+ 3   host_name            48874 non-null  object 
+ 4   neighbourhood_group  48895 non-null  object 
+ 5   neighbourhood        48895 non-null  object 
+ 6   latitude             48895 non-null  float64
+ 7   longitude            48895 non-null  float64
+ 8   room_type            48895 non-null  object 
+ 9   price                48895 non-null  int64  
+ 10  minimum_nights       48895 non-null  int64  
+ 11  total_reviews        48895 non-null  int64  
+ 12  last_review          38843 non-null  object 
+ 13  reviews_per_month    38843 non-null  float64
+ 14  host_listings_count  48895 non-null  int64  
+ 15  availability_365     48895 non-null  int64  
+dtypes: float64(3), int64(7), object(6)
+memory usage: 6.0+ MB
+In [17]:
+Airbnb_df['reviews_per_month'] =  Airbnb_df['reviews_per_month'].replace(to_replace=np.nan,value=0).astype('int64')
+In [18]:
+Airbnb_df['reviews_per_month'].isnull().sum()
+Out[18]:
+0
+In [19]:
+Airbnb_df.isnull().sum()
+Out[19]:
+listing_id                 0
+listing_name              16
+host_id                    0
+host_name                 21
+neighbourhood_group        0
+neighbourhood              0
+latitude                   0
+longitude                  0
+room_type                  0
+price                      0
+minimum_nights             0
+total_reviews              0
+last_review            10052
+reviews_per_month          0
+host_listings_count        0
+availability_365           0
+dtype: int64
+In [20]:
+Airbnb_df1=Airbnb_df.duplicated().sum()
+In [21]:
+Airbnb_df.count()
+Out[21]:
+listing_id             48895
+listing_name           48879
+host_id                48895
+host_name              48874
+neighbourhood_group    48895
+neighbourhood          48895
+latitude               48895
+longitude              48895
+room_type              48895
+price                  48895
+minimum_nights         48895
+total_reviews          48895
+last_review            38843
+reviews_per_month      48895
+host_listings_count    48895
+availability_365       48895
+dtype: int64
+In [22]:
+Airbnb_df.isnull().sum()
+Out[22]:
+listing_id                 0
+listing_name              16
+host_id                    0
+host_name                 21
+neighbourhood_group        0
+neighbourhood              0
+latitude                   0
+longitude                  0
+room_type                  0
+price                      0
+minimum_nights             0
+total_reviews              0
+last_review            10052
+reviews_per_month          0
+host_listings_count        0
+availability_365           0
+dtype: int64
+In [23]:
+Airbnb_df['listing_name'].fillna('unknown',inplace=True)
+Airbnb_df['host_name'].fillna('no_name',inplace=True)
+In [24]:
+Airbnb_df.isnull().sum()
+Out[24]:
+listing_id                 0
+listing_name               0
+host_id                    0
+host_name                  0
+neighbourhood_group        0
+neighbourhood              0
+latitude                   0
+longitude                  0
+room_type                  0
+price                      0
+minimum_nights             0
+total_reviews              0
+last_review            10052
+reviews_per_month          0
+host_listings_count        0
+availability_365           0
+dtype: int64
+In [25]:
+Airbnb_df[['listing_name','host_name']].isnull().sum()
+Out[25]:
+listing_name    0
+host_name       0
+dtype: int64
+In [26]:
+Airbnb_df['listing_name'].isnull().sum()
+Out[26]:
+0
+In [27]:
+Airbnb_df.head(30)
+Out[27]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	last_review	reviews_per_month	host_listings_count	availability_365
+0	2539	Clean & quiet apt home by the park	2787	John	Brooklyn	Kensington	40.64749	-73.97237	Private room	149	1	9	19-10-2018	0	6	365
+1	2595	Skylit Midtown Castle	2845	Jennifer	Manhattan	Midtown	40.75362	-73.98377	Entire home/apt	225	1	45	21-05-2019	0	2	355
+2	3647	THE VILLAGE OF HARLEM....NEW YORK !	4632	Elisabeth	Manhattan	Harlem	40.80902	-73.94190	Private room	150	3	0	NaN	0	1	365
+3	3831	Cozy Entire Floor of Brownstone	4869	LisaRoxanne	Brooklyn	Clinton Hill	40.68514	-73.95976	Entire home/apt	89	1	270	05-07-2019	4	1	194
+4	5022	Entire Apt: Spacious Studio/Loft by central park	7192	Laura	Manhattan	East Harlem	40.79851	-73.94399	Entire home/apt	80	10	9	19-11-2018	0	1	0
+5	5099	Large Cozy 1 BR Apartment In Midtown East	7322	Chris	Manhattan	Murray Hill	40.74767	-73.97500	Entire home/apt	200	3	74	22-06-2019	0	1	129
+6	5121	BlissArtsSpace!	7356	Garon	Brooklyn	Bedford-Stuyvesant	40.68688	-73.95596	Private room	60	45	49	05-10-2017	0	1	0
+7	5178	Large Furnished Room Near B'way	8967	Shunichi	Manhattan	Hell's Kitchen	40.76489	-73.98493	Private room	79	2	430	24-06-2019	3	1	220
+8	5203	Cozy Clean Guest Room - Family Apt	7490	MaryEllen	Manhattan	Upper West Side	40.80178	-73.96723	Private room	79	2	118	21-07-2017	0	1	0
+9	5238	Cute & Cozy Lower East Side 1 bdrm	7549	Ben	Manhattan	Chinatown	40.71344	-73.99037	Entire home/apt	150	1	160	09-06-2019	1	4	188
+10	5295	Beautiful 1br on Upper West Side	7702	Lena	Manhattan	Upper West Side	40.80316	-73.96545	Entire home/apt	135	5	53	22-06-2019	0	1	6
+11	5441	Central Manhattan/near Broadway	7989	Kate	Manhattan	Hell's Kitchen	40.76076	-73.98867	Private room	85	2	188	23-06-2019	1	1	39
+12	5803	Lovely Room 1, Garden, Best Area, Legal rental	9744	Laurie	Brooklyn	South Slope	40.66829	-73.98779	Private room	89	4	167	24-06-2019	1	3	314
+13	6021	Wonderful Guest Bedroom in Manhattan for SINGLES	11528	Claudio	Manhattan	Upper West Side	40.79826	-73.96113	Private room	85	2	113	05-07-2019	0	1	333
+14	6090	West Village Nest - Superhost	11975	Alina	Manhattan	West Village	40.73530	-74.00525	Entire home/apt	120	90	27	31-10-2018	0	1	0
+15	6848	Only 2 stops to Manhattan studio	15991	Allen & Irina	Brooklyn	Williamsburg	40.70837	-73.95352	Entire home/apt	140	2	148	29-06-2019	1	1	46
+16	7097	Perfect for Your Parents + Garden	17571	Jane	Brooklyn	Fort Greene	40.69169	-73.97185	Entire home/apt	215	2	198	28-06-2019	1	1	321
+17	7322	Chelsea Perfect	18946	Doti	Manhattan	Chelsea	40.74192	-73.99501	Private room	140	1	260	01-07-2019	2	1	12
+18	7726	Hip Historic Brownstone Apartment with Backyard	20950	Adam And Charity	Brooklyn	Crown Heights	40.67592	-73.94694	Entire home/apt	99	3	53	22-06-2019	4	1	21
+19	7750	Huge 2 BR Upper East Cental Park	17985	Sing	Manhattan	East Harlem	40.79685	-73.94872	Entire home/apt	190	7	0	NaN	0	2	249
+20	7801	Sweet and Spacious Brooklyn Loft	21207	Chaya	Brooklyn	Williamsburg	40.71842	-73.95718	Entire home/apt	299	3	9	28-12-2011	0	1	0
+21	8024	CBG CtyBGd HelpsHaiti rm#1:1-4	22486	Lisel	Brooklyn	Park Slope	40.68069	-73.97706	Private room	130	2	130	01-07-2019	1	6	347
+22	8025	CBG Helps Haiti Room#2.5	22486	Lisel	Brooklyn	Park Slope	40.67989	-73.97798	Private room	80	1	39	01-01-2019	0	6	364
+23	8110	CBG Helps Haiti Rm #2	22486	Lisel	Brooklyn	Park Slope	40.68001	-73.97865	Private room	110	2	71	02-07-2019	0	6	304
+24	8490	MAISON DES SIRENES1,bohemian apartment	25183	Nathalie	Brooklyn	Bedford-Stuyvesant	40.68371	-73.94028	Entire home/apt	120	2	88	19-06-2019	0	2	233
+25	8505	Sunny Bedroom Across Prospect Park	25326	Gregory	Brooklyn	Windsor Terrace	40.65599	-73.97519	Private room	60	1	19	23-06-2019	1	2	85
+26	8700	Magnifique Suite au N de Manhattan - vue Cloitres	26394	Claude & Sophie	Manhattan	Inwood	40.86754	-73.92639	Private room	80	4	0	NaN	0	1	0
+27	9357	Midtown Pied-a-terre	30193	Tommi	Manhattan	Hell's Kitchen	40.76715	-73.98533	Entire home/apt	150	10	58	13-08-2017	0	1	75
+28	9518	SPACIOUS, LOVELY FURNISHED MANHATTAN BEDROOM	31374	Shon	Manhattan	Inwood	40.86482	-73.92106	Private room	44	3	108	15-06-2019	1	3	311
+29	9657	Modern 1 BR / NYC / EAST VILLAGE	21904	Dana	Manhattan	East Village	40.72920	-73.98542	Entire home/apt	180	14	29	19-04-2019	0	1	67
+In [28]:
+# how to drop the column in dataset
+In [29]:
+Airbnb_df = Airbnb_df.drop(['last_review'], axis=1)
+In [30]:
+Airbnb_df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 48895 entries, 0 to 48894
+Data columns (total 15 columns):
+ #   Column               Non-Null Count  Dtype  
+---  ------               --------------  -----  
+ 0   listing_id           48895 non-null  int64  
+ 1   listing_name         48895 non-null  object 
+ 2   host_id              48895 non-null  int64  
+ 3   host_name            48895 non-null  object 
+ 4   neighbourhood_group  48895 non-null  object 
+ 5   neighbourhood        48895 non-null  object 
+ 6   latitude             48895 non-null  float64
+ 7   longitude            48895 non-null  float64
+ 8   room_type            48895 non-null  object 
+ 9   price                48895 non-null  int64  
+ 10  minimum_nights       48895 non-null  int64  
+ 11  total_reviews        48895 non-null  int64  
+ 12  reviews_per_month    48895 non-null  int64  
+ 13  host_listings_count  48895 non-null  int64  
+ 14  availability_365     48895 non-null  int64  
+dtypes: float64(2), int64(8), object(5)
+memory usage: 5.6+ MB
+In [31]:
+Airbnb_df.shape
+Out[31]:
+(48895, 15)
+In [32]:
+Airbnb_df.isnull().sum()
+Out[32]:
+listing_id             0
+listing_name           0
+host_id                0
+host_name              0
+neighbourhood_group    0
+neighbourhood          0
+latitude               0
+longitude              0
+room_type              0
+price                  0
+minimum_nights         0
+total_reviews          0
+reviews_per_month      0
+host_listings_count    0
+availability_365       0
+dtype: int64
+In [33]:
+Airbnb_df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 48895 entries, 0 to 48894
+Data columns (total 15 columns):
+ #   Column               Non-Null Count  Dtype  
+---  ------               --------------  -----  
+ 0   listing_id           48895 non-null  int64  
+ 1   listing_name         48895 non-null  object 
+ 2   host_id              48895 non-null  int64  
+ 3   host_name            48895 non-null  object 
+ 4   neighbourhood_group  48895 non-null  object 
+ 5   neighbourhood        48895 non-null  object 
+ 6   latitude             48895 non-null  float64
+ 7   longitude            48895 non-null  float64
+ 8   room_type            48895 non-null  object 
+ 9   price                48895 non-null  int64  
+ 10  minimum_nights       48895 non-null  int64  
+ 11  total_reviews        48895 non-null  int64  
+ 12  reviews_per_month    48895 non-null  int64  
+ 13  host_listings_count  48895 non-null  int64  
+ 14  availability_365     48895 non-null  int64  
+dtypes: float64(2), int64(8), object(5)
+memory usage: 5.6+ MB
+In [34]:
+Airbnb_df.head(30)
+Out[34]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	reviews_per_month	host_listings_count	availability_365
+0	2539	Clean & quiet apt home by the park	2787	John	Brooklyn	Kensington	40.64749	-73.97237	Private room	149	1	9	0	6	365
+1	2595	Skylit Midtown Castle	2845	Jennifer	Manhattan	Midtown	40.75362	-73.98377	Entire home/apt	225	1	45	0	2	355
+2	3647	THE VILLAGE OF HARLEM....NEW YORK !	4632	Elisabeth	Manhattan	Harlem	40.80902	-73.94190	Private room	150	3	0	0	1	365
+3	3831	Cozy Entire Floor of Brownstone	4869	LisaRoxanne	Brooklyn	Clinton Hill	40.68514	-73.95976	Entire home/apt	89	1	270	4	1	194
+4	5022	Entire Apt: Spacious Studio/Loft by central park	7192	Laura	Manhattan	East Harlem	40.79851	-73.94399	Entire home/apt	80	10	9	0	1	0
+5	5099	Large Cozy 1 BR Apartment In Midtown East	7322	Chris	Manhattan	Murray Hill	40.74767	-73.97500	Entire home/apt	200	3	74	0	1	129
+6	5121	BlissArtsSpace!	7356	Garon	Brooklyn	Bedford-Stuyvesant	40.68688	-73.95596	Private room	60	45	49	0	1	0
+7	5178	Large Furnished Room Near B'way	8967	Shunichi	Manhattan	Hell's Kitchen	40.76489	-73.98493	Private room	79	2	430	3	1	220
+8	5203	Cozy Clean Guest Room - Family Apt	7490	MaryEllen	Manhattan	Upper West Side	40.80178	-73.96723	Private room	79	2	118	0	1	0
+9	5238	Cute & Cozy Lower East Side 1 bdrm	7549	Ben	Manhattan	Chinatown	40.71344	-73.99037	Entire home/apt	150	1	160	1	4	188
+10	5295	Beautiful 1br on Upper West Side	7702	Lena	Manhattan	Upper West Side	40.80316	-73.96545	Entire home/apt	135	5	53	0	1	6
+11	5441	Central Manhattan/near Broadway	7989	Kate	Manhattan	Hell's Kitchen	40.76076	-73.98867	Private room	85	2	188	1	1	39
+12	5803	Lovely Room 1, Garden, Best Area, Legal rental	9744	Laurie	Brooklyn	South Slope	40.66829	-73.98779	Private room	89	4	167	1	3	314
+13	6021	Wonderful Guest Bedroom in Manhattan for SINGLES	11528	Claudio	Manhattan	Upper West Side	40.79826	-73.96113	Private room	85	2	113	0	1	333
+14	6090	West Village Nest - Superhost	11975	Alina	Manhattan	West Village	40.73530	-74.00525	Entire home/apt	120	90	27	0	1	0
+15	6848	Only 2 stops to Manhattan studio	15991	Allen & Irina	Brooklyn	Williamsburg	40.70837	-73.95352	Entire home/apt	140	2	148	1	1	46
+16	7097	Perfect for Your Parents + Garden	17571	Jane	Brooklyn	Fort Greene	40.69169	-73.97185	Entire home/apt	215	2	198	1	1	321
+17	7322	Chelsea Perfect	18946	Doti	Manhattan	Chelsea	40.74192	-73.99501	Private room	140	1	260	2	1	12
+18	7726	Hip Historic Brownstone Apartment with Backyard	20950	Adam And Charity	Brooklyn	Crown Heights	40.67592	-73.94694	Entire home/apt	99	3	53	4	1	21
+19	7750	Huge 2 BR Upper East Cental Park	17985	Sing	Manhattan	East Harlem	40.79685	-73.94872	Entire home/apt	190	7	0	0	2	249
+20	7801	Sweet and Spacious Brooklyn Loft	21207	Chaya	Brooklyn	Williamsburg	40.71842	-73.95718	Entire home/apt	299	3	9	0	1	0
+21	8024	CBG CtyBGd HelpsHaiti rm#1:1-4	22486	Lisel	Brooklyn	Park Slope	40.68069	-73.97706	Private room	130	2	130	1	6	347
+22	8025	CBG Helps Haiti Room#2.5	22486	Lisel	Brooklyn	Park Slope	40.67989	-73.97798	Private room	80	1	39	0	6	364
+23	8110	CBG Helps Haiti Rm #2	22486	Lisel	Brooklyn	Park Slope	40.68001	-73.97865	Private room	110	2	71	0	6	304
+24	8490	MAISON DES SIRENES1,bohemian apartment	25183	Nathalie	Brooklyn	Bedford-Stuyvesant	40.68371	-73.94028	Entire home/apt	120	2	88	0	2	233
+25	8505	Sunny Bedroom Across Prospect Park	25326	Gregory	Brooklyn	Windsor Terrace	40.65599	-73.97519	Private room	60	1	19	1	2	85
+26	8700	Magnifique Suite au N de Manhattan - vue Cloitres	26394	Claude & Sophie	Manhattan	Inwood	40.86754	-73.92639	Private room	80	4	0	0	1	0
+27	9357	Midtown Pied-a-terre	30193	Tommi	Manhattan	Hell's Kitchen	40.76715	-73.98533	Entire home/apt	150	10	58	0	1	75
+28	9518	SPACIOUS, LOVELY FURNISHED MANHATTAN BEDROOM	31374	Shon	Manhattan	Inwood	40.86482	-73.92106	Private room	44	3	108	1	3	311
+29	9657	Modern 1 BR / NYC / EAST VILLAGE	21904	Dana	Manhattan	East Village	40.72920	-73.98542	Entire home/apt	180	14	29	0	1	67
+In [35]:
+Airbnb_df.sample(5)
+Out[35]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	reviews_per_month	host_listings_count	availability_365
+27527	21669322	Comfortable & Bright Studio in the East Village	3281798	Guillermo	Manhattan	East Village	40.73014	-73.98152	Entire home/apt	180	3	8	0	1	10
+46625	35348968	Light filled private apartment in bed-stuy!	25127792	Té	Brooklyn	Bedford-Stuyvesant	40.69006	-73.95127	Entire home/apt	200	2	1	1	1	21
+946	363673	Beautiful 3 bedroom in Manhattan	256239	Tracey	Manhattan	Upper West Side	40.80142	-73.96931	Private room	3000	7	0	0	1	365
+10240	7841904	Modern Private Room in Meatpacking	24976518	Mike	Manhattan	West Village	40.74005	-74.00466	Private room	75	3	4	0	1	0
+16805	13411560	Cozy and charming studio in UWS	26676357	Connie	Manhattan	Upper West Side	40.77856	-73.98278	Entire home/apt	150	7	2	0	1	0
+In [36]:
+Airbnb_df.sample(5)
+Out[36]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	reviews_per_month	host_listings_count	availability_365
+2502	1281054	Casa de Chester Baby Kitty	6970929	Andy	Manhattan	East Village	40.72160	-73.98204	Entire home/apt	200	3	0	0	1	0
+16099	13007839	Second floor apartment	71754921	Berta	Brooklyn	Crown Heights	40.66789	-73.94351	Entire home/apt	100	1	0	0	1	0
+31593	24609263	Beautiful 2bdr apt in Brooklyn near to everyth...	43803591	Anna	Brooklyn	Fort Hamilton	40.61257	-74.03598	Entire home/apt	135	5	31	2	1	151
+45270	34646398	Artsy bedroom w/garden & private bathroom .	1179779	Sandrine	Brooklyn	Bedford-Stuyvesant	40.69026	-73.93235	Private room	119	2	0	0	1	58
+33025	26053340	Beloved Williamsburg, Brooklyn is calling to you!	18824752	Ashley	Brooklyn	Williamsburg	40.70858	-73.95378	Private room	70	3	42	3	1	20
+In [37]:
+Airbnb_df['listing_id'].nunique()
+Out[37]:
+48895
+In [38]:
+Airbnb_df['neighbourhood'].nunique()
+Out[38]:
+221
+In [39]:
+Airbnb_df['room_type'].nunique()
+Out[39]:
+3
+In [40]:
+Airbnb_df['host_name'].nunique()
+Out[40]:
+11453
+In [41]:
+Airbnb_df[Airbnb_df['host_name']=='Judy']['listing_name'].nunique()
+Out[41]:
+18
+In [42]:
+# this means that the same host David operates different 402 listings/properties
+In [43]:
+Airbnb_df[Airbnb_df['host_name']=='Judy']['listing_name'].unique()
+Out[43]:
+array(['Sunny 1 or 2 BR apt in Boerum Hill',
+       'Luxury NYC Studio for Super Bowl 48',
+       'Mid Town East Side Apartment ',
+       'Furnished Room with View of E River',
+       'Huge Private Room in the BEST location',
+       'Comfortable Private Apartment in Heart of Flatbush',
+       'Spacious Bedroom on the East River',
+       'A cozy place to set your mind free.',
+       'Entire Times Square 1BD Apartment',
+       'Quaint & Charming 2BR + Futon',
+       'Private Studio Apartment in Heart of Brooklyn!!',
+       'One bedroom; private house; great location',
+       'Like live in your own home while traveling',
+       'Beautiful 4 Bedroom Apartment', 'Sumpter Suites',
+       'Central Park master room with private bathroom.',
+       'A space like a home',
+       'UWS brownstone with Grdn,  Guest Bdrm, 2 bthrms'], dtype=object)
+In [44]:
+Airbnb_df[Airbnb_df['listing_name']==Airbnb_df['host_name']]
+Out[44]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	reviews_per_month	host_listings_count	availability_365
+9473	7264659	Olivier	6994503	Olivier	Manhattan	Upper West Side	40.78931	-73.97520	Entire home/apt	200	5	12	0	1	25
+10682	8212051	Monty	43302952	Monty	Brooklyn	East Flatbush	40.66383	-73.92706	Shared room	95	2	7	0	1	238
+16422	13186374	Sean	35143476	Sean	Brooklyn	Windsor Terrace	40.65182	-73.98043	Entire home/apt	400	7	0	0	1	0
+23996	19348168	Cyn	74033595	Cyn	Brooklyn	Bedford-Stuyvesant	40.67850	-73.91478	Private room	75	2	1	0	1	0
+24152	19456810	Hillside Hotel	134184451	Hillside Hotel	Queens	Briarwood	40.70454	-73.81549	Private room	93	1	2	0	18	90
+24607	19785737	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70445	-73.81399	Private room	135	1	1	0	18	180
+26734	21231543	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70428	-73.81353	Private room	135	1	0	0	18	365
+26752	21243952	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70288	-73.81531	Private room	135	1	1	0	18	365
+26753	21244035	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70319	-73.81410	Private room	135	1	2	0	18	365
+26889	21311903	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70258	-73.81510	Private room	135	1	0	0	18	365
+26891	21312075	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70333	-73.81380	Private room	135	1	0	0	18	365
+26892	21312191	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70259	-73.81415	Private room	135	1	0	0	18	365
+26893	21312225	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70262	-73.81526	Private room	135	1	1	0	18	365
+26894	21312283	Hillside Hotel	134184451	Hillside Hotel	Queens	Briarwood	40.70450	-73.81447	Private room	135	1	0	0	18	355
+26895	21312330	Hillside Hotel	134184451	Hillside Hotel	Queens	Briarwood	40.70458	-73.81418	Private room	135	1	0	0	18	355
+26896	21312403	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70423	-73.81440	Private room	165	1	0	0	18	362
+26897	21312440	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70269	-73.81585	Private room	165	1	0	0	18	360
+26898	21312495	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70426	-73.81509	Private room	165	1	0	0	18	362
+26899	21312549	Hillside Hotel	134184451	Hillside Hotel	Queens	Jamaica	40.70262	-73.81579	Private room	165	1	0	0	18	355
+26900	21312595	Hillside Hotel	134184451	Hillside Hotel	Queens	Briarwood	40.70475	-73.81572	Private room	165	1	2	0	18	355
+26901	21312687	Hillside Hotel	134184451	Hillside Hotel	Queens	Briarwood	40.70471	-73.81542	Private room	135	1	3	0	18	319
+26902	21312732	Hillside Hotel	134184451	Hillside Hotel	Queens	Briarwood	40.70455	-73.81528	Private room	135	1	0	0	18	309
+27186	21488093	Rod	128142697	Rod	Manhattan	Upper East Side	40.76719	-73.96973	Entire home/apt	750	4	0	0	2	0
+33964	26895166	2018Serenity	202318295	2018Serenity	Manhattan	East Harlem	40.79424	-73.94290	Private room	50	5	4	0	1	32
+43564	33718254	Imperial	249479517	Imperial	Bronx	Soundview	40.82864	-73.87609	Private room	45	2	6	2	2	24
+45510	34803347	Yu	197052947	Yu	Manhattan	Roosevelt Island	40.76417	-73.94865	Shared room	55	7	0	0	1	38
+In [45]:
+sns.boxplot(x=Airbnb_df['price'])
+plt.show()
+ 
+In [46]:
+Airbnb_df.sample(30)
+Out[46]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	reviews_per_month	host_listings_count	availability_365
+47671	35863336	STUNNING SPACIOUS KING SIZE -BEDROOM NEAR COLU...	2542371	Leonidas	Manhattan	Upper West Side	40.79829	-73.97266	Entire home/apt	174	30	0	0	1	1
+7621	5729530	1Br apt on the UES accomodates two	29707420	Riki	Manhattan	Upper East Side	40.76939	-73.95040	Entire home/apt	150	1	0	0	1	0
+28398	22054258	Chambre pour couple où personne seule	161081229	Ibrahim Maiga	Bronx	Morrisania	40.82496	-73.91389	Private room	45	2	54	2	2	313
+5943	4349695	Rustic Chic Private Living Room	22578720	Derek	Brooklyn	Flatbush	40.64507	-73.95933	Private room	69	1	33	0	1	0
+48538	36311599	Your 1B1B Home in Midtown Clean Cozy & Comfy	180397183	Xiao	Manhattan	Hell's Kitchen	40.76806	-73.99254	Entire home/apt	320	1	0	0	1	90
+16082	12999167	Charming & Sunny Studio in the Heart of NYC	19726948	Willow	Manhattan	Lower East Side	40.72151	-73.98814	Entire home/apt	158	2	145	4	1	193
+11803	9184688	BEAUTIFUL APT ON CENTRAL PARK WEST	8737065	Barbara And Dan	Manhattan	Upper West Side	40.79644	-73.96135	Entire home/apt	250	7	0	0	1	0
+27564	21692066	South Brooklyn Artist / Student Studio Retreat	66386802	Andrew	Brooklyn	Bensonhurst	40.61097	-73.99830	Private room	78	1	21	1	1	30
+2245	1063554	bedroom in big sunny loft (& Roof!)	2873394	Aurora	Brooklyn	Bushwick	40.69935	-73.93713	Private room	60	2	10	0	2	18
+16141	13040618	Sunny and spacious private room	23457783	Stephanie	Brooklyn	Bushwick	40.69050	-73.90834	Private room	40	1	1	0	1	0
+28143	21947039	Wyndham Midtown 45 at NYC - 2 Bedroom Presiden...	160175378	Russ	Manhattan	Midtown	40.75341	-73.97313	Entire home/apt	400	1	1	0	2	0
+6923	4957358	A Romantic Loft plus terrace Heart of Brooklyn	90860	Amy	Brooklyn	Bedford-Stuyvesant	40.68306	-73.93141	Entire home/apt	145	2	222	4	4	109
+16960	13492036	Beautiful 1 bedroom in Astoria,Queens	77325010	Petros	Queens	Ditmars Steinway	40.77231	-73.90793	Entire home/apt	75	4	1	0	1	0
+619	234184	Spacious Stunning Harlem Townhouse	902054	William	Manhattan	Harlem	40.80903	-73.94197	Entire home/apt	325	5	89	0	1	153
+24244	19531580	SUNNY N.Y.C. APARTMENT	8816087	Danilo	Manhattan	East Harlem	40.80183	-73.94358	Entire home/apt	130	2	0	0	2	0
+30973	24000797	Stunning Brooklyn Suite	19202612	Anthony	Brooklyn	Canarsie	40.63020	-73.89970	Entire home/apt	80	3	13	0	1	0
+46658	35371114	August 25-28 Manhatten! Total suite sleeps 4 o...	96019	Ruth	Manhattan	Midtown	40.76527	-73.98139	Private room	299	3	0	0	1	3
+35934	28542484	Sonder | 21 Chelsea | Sophisticated 2BR + Rooftop	12243051	Sonder	Manhattan	Chelsea	40.74299	-73.99436	Entire home/apt	377	29	0	0	96	302
+36957	29383605	Your Home 安全舒適的家\n 12 mins Manhattan	213781715	Anting	Brooklyn	Greenpoint	40.73543	-73.95454	Private room	119	1	0	0	33	179
+525	190968	Lovely Brooklyn Brownstone 1BR!	922922	Karen	Brooklyn	Prospect Heights	40.67946	-73.96501	Entire home/apt	215	3	33	0	1	156
+18567	14661771	Museum Mile	5420713	Alice	Manhattan	Upper East Side	40.78517	-73.95678	Entire home/apt	225	5	16	0	1	364
+39942	31041100	Charming studio close to everything	74841734	Christina	Manhattan	Hell's Kitchen	40.76676	-73.98953	Entire home/apt	200	6	2	1	1	11
+14092	10801094	FT Greene Flat Private Entrance	11189753	Sj	Brooklyn	Fort Greene	40.68729	-73.96995	Entire home/apt	225	10	10	0	4	350
+6433	4685985	Living room & Bedroom_Williamsburg	4357223	Itziar	Brooklyn	Williamsburg	40.70574	-73.95552	Private room	120	1	0	0	1	0
+47560	35803557	Sunny room in a 2 bedroom shared apartment	77196523	Ninett	Manhattan	Harlem	40.82936	-73.94930	Private room	80	2	0	0	1	15
+33768	26757594	A Great Room	199833548	Syeda	Queens	Sunnyside	40.74136	-73.92476	Private room	80	1	27	2	9	309
+15008	11965263	Huge sunny bedroom in Crown Heights	9028473	Molly	Brooklyn	Crown Heights	40.67265	-73.94674	Private room	75	1	0	0	1	0
+17672	13883393	One Bedroom Apartment- Only 15 min to Time Squ...	82179512	Mingmar	Queens	Woodside	40.74399	-73.89817	Entire home/apt	87	1	162	4	1	332
+31201	24230182	Brand-new Room - 20 mins to Manhattan	127412674	Charles	Brooklyn	Williamsburg	40.70111	-73.94471	Private room	75	2	28	1	2	342
+19898	15948069	4 bdrm/2 bath apt. Central Pk, Columbia U.	5162192	Amy	Manhattan	Upper West Side	40.79835	-73.96160	Entire home/apt	240	30	1	0	12	211
+In [47]:
+def iqr_technique(DFcolumn):
+    Q1 = np.percentile(DFcolumn,25)
+    Q3 = np.percentile(DFcolumn,75)
+    IQR = Q3-Q1
+    lower_range = Q1 - (1.5 * IQR)
+    upper_range = Q3 + (1.5 * IQR)
+    
+    return lower_range, upper_range
+In [48]:
+lower_bound,upper_bound = iqr_technique(Airbnb_df['price'])
+lower_bound
+Out[48]:
+-90.0
+In [49]:
+upper_bound
+Out[49]:
+334.0
+In [50]:
+lower_bound,upper_bound = iqr_technique(Airbnb_df['price'])
+Airbnb_df = Airbnb_df[(Airbnb_df.price>lower_bound) & (Airbnb_df.price<upper_bound)]
+In [51]:
+sns.boxplot(x=Airbnb_df['price'])
+plt.show()
+ 
+In [52]:
+Airbnb_df.shape
+Out[52]:
+(45918, 15)
+In [53]:
+Airbnb_df['price'].max() #here 333 because we have cosidered the lower value then the upper_bound
+Out[53]:
+333
+In [54]:
+# Exploratory Data Analysis (EDA)
+In [55]:
+plt.figure(figsize=(12,5))
+
+sns.set_theme(style='darkgrid')
+
+sns.distplot(Airbnb_df['price'],color=('r'))
+
+plt.xlabel('price', fontsize=15)
+plt.ylabel('Density', fontsize=15)
+Out[55]:
+Text(0, 0.5, 'Density')
+ 
+In [56]:
+plt.figure(figsize=(20,5))
+
+sns.set_theme(style='darkgrid')
+
+sns.displot(Airbnb_df['price'],color=('r'))
+
+plt.xlabel('price', fontsize=15)
+plt.ylabel('Density', fontsize=15)
+Out[56]:
+Text(-0.30555555555555536, 0.5, 'Density')
+<Figure size 2000x500 with 0 Axes>
+ 
+In [57]:
+print(Airbnb_df['price'].min())
+print(Airbnb_df['price'].max())
+0
+333
+#obsevations The range of prices being charged on AIrbnb appears to be from 20 to 330 dollars, with the majority of listings falling in the price range of 50 to 150 dollars. The distribution of prices appears to have a peak in the 50 to 150 dollars range, with a relatively lower density of listings in the lower and higher price ranges There may be fewer listings available at price above 250 dollars, as the density of listings drops significanlty in this range
+Total Listing/property count in Each Neighbourhood Group using Count plot
+In [58]:
+Airbnb_df.columns
+Out[58]:
+Index(['listing_id', 'listing_name', 'host_id', 'host_name',
+       'neighbourhood_group', 'neighbourhood', 'latitude', 'longitude',
+       'room_type', 'price', 'minimum_nights', 'total_reviews',
+       'reviews_per_month', 'host_listings_count', 'availability_365'],
+      dtype='object')
+In [59]:
+Airbnb_df['listing_name'].value_counts()
+Out[59]:
+listing_name
+Hillside Hotel                                       18
+Home away from home                                  17
+unknown                                              15
+New york Multi-unit building                         13
+Brooklyn Apartment                                   12
+                                                     ..
+Incredible 3 BR Union Square Loft                     1
+NYC living to it's fullest... in a good way!          1
+Spacious Sun Drenched Brick Encrusted Loft            1
+EAST 60TH ST&1ST AVE/ 2BR DOORMAN BLDG                1
+Trendy duplex in the very heart of Hell's Kitchen     1
+Name: count, Length: 44979, dtype: int64
+In [60]:
+counts= Airbnb_df['neighbourhood_group'].value_counts()
+counts
+Out[60]:
+neighbourhood_group
+Manhattan        19501
+Brooklyn         19415
+Queens            5567
+Bronx             1070
+Staten Island      365
+Name: count, dtype: int64
+In [61]:
+#count the number of listings in each neighbourhood group and store the result in pandas series
+counts= Airbnb_df['neighbourhood_group'].value_counts()
+Top_Neighbourhood_group= counts.reset_index()
+Top_Neighbourhood_group.columns=['Neighbourhood_groups','Listing_counts']
+Top_Neighbourhood_group
+Out[61]:
+	Neighbourhood_groups	Listing_counts
+0	Manhattan	19501
+1	Brooklyn	19415
+2	Queens	5567
+3	Bronx	1070
+4	Staten Island	365
+In [62]:
+Airbnb_df.tail(50)
+Out[62]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	reviews_per_month	host_listings_count	availability_365
+48844	36453952	West Village Studio on quiet cobblestone street	115491896	Will	Manhattan	West Village	40.73620	-74.00827	Entire home/apt	205	1	0	0	1	365
+48845	36454025	Private 5 star room	261338177	Diana	Brooklyn	Gravesend	40.59131	-73.97114	Private room	33	2	0	0	6	318
+48846	36454717	#5 New Hotel-Like Private Room KING bed near JFK	263504959	David	Queens	Woodhaven	40.69185	-73.86431	Private room	37	1	0	0	8	352
+48847	36455321	#6 New Hotel-Like Private Room QUEEN Bed near JFK	263504959	David	Queens	Woodhaven	40.69183	-73.86523	Private room	34	1	0	0	8	320
+48848	36455402	Cute plant friendly studio in hip Brooklyn area!	184501278	Em	Brooklyn	Crown Heights	40.67198	-73.95329	Entire home/apt	180	1	0	0	1	165
+48849	36455579	Studio in Manhattan(独立出入)	257261595	Xiaolan	Manhattan	Harlem	40.80951	-73.95347	Entire home/apt	65	1	0	0	1	32
+48850	36455584	Large studio at Union Square! for 3-5 ppl	50812891	Molo	Manhattan	East Village	40.73231	-73.98689	Entire home/apt	159	1	0	0	1	166
+48851	36455649	#7 New Hotel-Like Private Room KING bed near JFK	263504959	David	Queens	Woodhaven	40.69137	-73.86591	Private room	35	1	0	0	8	341
+48852	36455809	Cozy Private Room in Bushwick, Brooklyn	74162901	Christine	Brooklyn	Bushwick	40.69805	-73.92801	Private room	30	1	1	1	1	1
+48853	36455917	Sunny&quiet paradise in the WV with open views	274103383	Jennifer	Manhattan	West Village	40.73444	-74.00335	Private room	202	2	0	0	1	84
+48854	36456548	Gorgeous Brooklyn Penthouse Apartment w/City V...	13108199	Jeffrey	Brooklyn	Greenpoint	40.72781	-73.94947	Private room	150	4	0	0	1	267
+48855	36456829	Perfectly Located Organic Getaway	6677425	Isabel	Manhattan	Upper West Side	40.79753	-73.96155	Shared room	55	2	0	0	2	49
+48857	36457832	❥NYC Apt: 4min/subway, 25m/city, 20m/LGA,JFK❥	63272360	Annie Lawrence	Queens	Woodhaven	40.69482	-73.86618	Entire home/apt	85	3	0	0	6	300
+48858	36458668	2beds Private Room Step to LGA, CitiFiled, Mid...	217463199	Marvy	Queens	Flushing	40.74387	-73.82556	Private room	68	3	0	0	4	362
+48859	36468375	two girls room , I speak Chinese and English	274188386	Qizhi	Manhattan	East Village	40.73197	-73.98674	Private room	93	7	0	0	1	173
+48860	36468386	纽约罗岛Roosevelt Island整租或合租 窗外美景 设施全 家具新 到曼哈顿方便 ...	228268650	Yan	Manhattan	Roosevelt Island	40.76688	-73.94688	Entire home/apt	145	1	0	0	1	30
+48861	36468409	One bedroom Manhattan Upper East Side Apartment	57502664	Omar	Manhattan	Upper East Side	40.76628	-73.95795	Entire home/apt	120	1	0	0	1	1
+48862	36468880	Private room in a nice Brooklyn apartment	274195458	Abayomi	Brooklyn	Bushwick	40.69308	-73.91025	Private room	130	1	0	0	1	83
+48863	36469741	Comfortable & Big room with 2 beds!	274012871	Stefan	Queens	Long Island City	40.76726	-73.93936	Private room	93	2	0	0	2	14
+48864	36471896	Private Bedroom & PRIVATE BATHROOM in Manhattan	23548340	Sarah	Manhattan	Upper East Side	40.77192	-73.95369	Private room	95	1	0	0	1	2
+48865	36472171	1 bedroom in sunlit apartment	99144947	Brenda	Manhattan	Inwood	40.86845	-73.92449	Private room	80	1	0	0	1	79
+48866	36472710	CozyHideAway Suite	274225617	Alberth	Queens	Briarwood	40.70786	-73.81448	Entire home/apt	58	1	0	0	1	159
+48867	36473044	The place you were dreaming for.(only for guys)	261338177	Diana	Brooklyn	Gravesend	40.59080	-73.97116	Shared room	25	1	0	0	6	338
+48868	36473253	Heaven for you(only for guy)	261338177	Diana	Brooklyn	Gravesend	40.59118	-73.97119	Shared room	25	7	0	0	6	365
+48869	36474023	Cozy, Sunny Brooklyn Escape	1550580	Julia	Brooklyn	Bedford-Stuyvesant	40.68759	-73.95705	Private room	45	4	0	0	1	7
+48870	36474911	Cozy, clean Williamsburg 1- bedroom apartment	1273444	Tanja	Brooklyn	Williamsburg	40.71197	-73.94946	Entire home/apt	99	4	0	0	1	22
+48871	36475746	A LARGE ROOM - 1 MONTH MINIMUM - WASHER&DRYER	144008701	Ozzy Ciao	Manhattan	Harlem	40.82233	-73.94687	Private room	35	29	0	0	2	31
+48872	36476675	Nycity-MyHome	8636072	Ben	Manhattan	Hell's Kitchen	40.76236	-73.99255	Entire home/apt	260	3	0	0	1	9
+48873	36477307	Brooklyn paradise	241945355	Clement & Rose	Brooklyn	Flatlands	40.63116	-73.92616	Entire home/apt	170	1	0	0	2	363
+48874	36477588	Short Term Rental in East Harlem	214535893	Jeffrey	Manhattan	East Harlem	40.79760	-73.93947	Private room	50	7	0	0	1	22
+48875	36478343	Welcome all as family	274273284	Anastasia	Manhattan	East Harlem	40.78749	-73.94749	Private room	140	1	0	0	1	180
+48876	36478357	Cozy, Air-Conditioned Private Bedroom in Harlem	177932088	Joseph	Manhattan	Harlem	40.80953	-73.95410	Private room	60	1	0	0	1	26
+48877	36479230	Studio sized room with beautiful light	65767720	Melanie	Brooklyn	Bushwick	40.70418	-73.91471	Private room	42	7	0	0	1	16
+48878	36479723	Room for rest	41326856	Jeerathinan	Queens	Elmhurst	40.74477	-73.87727	Private room	45	1	0	0	5	172
+48879	36480292	Gorgeous 1.5 Bdr with a private yard- Williams...	540335	Lee	Brooklyn	Williamsburg	40.71728	-73.94394	Entire home/apt	120	20	0	0	1	22
+48880	36481315	The Raccoon Artist Studio in Williamsburg New ...	208514239	Melki	Brooklyn	Williamsburg	40.71232	-73.94220	Entire home/apt	120	1	0	0	3	365
+48881	36481615	Peaceful space in Greenpoint, BK	274298453	Adrien	Brooklyn	Greenpoint	40.72585	-73.94001	Private room	54	6	0	0	1	15
+48882	36482231	Bushwick _ Myrtle-Wyckoff	66058896	Luisa	Brooklyn	Bushwick	40.69652	-73.91079	Private room	40	20	0	0	1	31
+48883	36482416	Sunny Bedroom NYC! Walking to Central Park!!	131529729	Kendall	Manhattan	East Harlem	40.79755	-73.93614	Private room	75	2	0	0	2	364
+48884	36482783	Brooklyn Oasis in the heart of Williamsburg	274307600	Jonathan	Brooklyn	Williamsburg	40.71790	-73.96238	Private room	190	7	0	0	1	341
+48885	36482809	Stunning Bedroom NYC! Walking to Central Park!!	131529729	Kendall	Manhattan	East Harlem	40.79633	-73.93605	Private room	75	2	0	0	2	353
+48886	36483010	Comfy 1 Bedroom in Midtown East	274311461	Scott	Manhattan	Midtown	40.75561	-73.96723	Entire home/apt	200	6	0	0	1	176
+48887	36483152	Garden Jewel Apartment in Williamsburg New York	208514239	Melki	Brooklyn	Williamsburg	40.71232	-73.94220	Entire home/apt	170	1	0	0	3	365
+48888	36484087	Spacious Room w/ Private Rooftop, Central loca...	274321313	Kat	Manhattan	Hell's Kitchen	40.76392	-73.99183	Private room	125	4	0	0	1	31
+48889	36484363	QUIT PRIVATE HOUSE	107716952	Michael	Queens	Jamaica	40.69137	-73.80844	Private room	65	1	0	0	2	163
+48890	36484665	Charming one bedroom - newly renovated rowhouse	8232441	Sabrina	Brooklyn	Bedford-Stuyvesant	40.67853	-73.94995	Private room	70	2	0	0	2	9
+48891	36485057	Affordable room in Bushwick/East Williamsburg	6570630	Marisol	Brooklyn	Bushwick	40.70184	-73.93317	Private room	40	4	0	0	2	36
+48892	36485431	Sunny Studio at Historical Neighborhood	23492952	Ilgar & Aysel	Manhattan	Harlem	40.81475	-73.94867	Entire home/apt	115	10	0	0	1	27
+48893	36485609	43rd St. Time Square-cozy single bed	30985759	Taz	Manhattan	Hell's Kitchen	40.75751	-73.99112	Shared room	55	1	0	0	6	2
+48894	36487245	Trendy duplex in the very heart of Hell's Kitchen	68119814	Christophe	Manhattan	Hell's Kitchen	40.76404	-73.98933	Private room	90	7	0	0	1	23
+In [63]:
+Airbnb_df['room_type'].value_counts()
+Out[63]:
+room_type
+Entire home/apt    22784
+Private room       21996
+Shared room         1138
+Name: count, dtype: int64
+In [64]:
+count=Airbnb_df['room_type'].value_counts()
+Top_Neighbourhood=count.reset_index()
+Top_Neighbourhood.columns=['room_type','property_counts']
+Top_Neighbourhood
+Out[64]:
+	room_type	property_counts
+0	Entire home/apt	22784
+1	Private room	21996
+2	Shared room	1138
+In [65]:
+plt.figure(figsize=(13,8))
+sns.countplot(data=Airbnb_df,x='neighbourhood_group')
+plt.title('Neighbourhood_group Listing Counts in NYC', fontsize=15)
+plt.xlabel('Neighbourhood_group', fontsize=14)
+plt.ylabel('Total_Listing_counts', fontsize=14)
+plt.show()
+ 
+In [78]:
+Airbnb_df[Airbnb_df['neighbourhood_group']=='Queens']
+Out[78]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	reviews_per_month	host_listings_count	availability_365
+46	12937	1 Stop fr. Manhattan! Private Suite,Landmark B...	50124	Orestes	Queens	Long Island City	40.74771	-73.94740	Private room	130	3	248	2	1	215
+77	18198	Little King of Queens	70091	Justin	Queens	Woodside	40.75038	-73.90334	Private room	70	30	25	0	1	324
+143	32363	Fully Furnished Basement Apartment	140025	Fredah	Queens	Flushing	40.74028	-73.83168	Private room	140	2	1	0	1	1
+161	39593	A room w/ a Manhattan view, longer stay	110506	Myung	Queens	Sunnyside	40.74559	-73.92313	Private room	79	30	28	0	1	126
+196	51850	( F) Excellent/Pvt Rm	27848	Jullett	Queens	Jamaica	40.67252	-73.76597	Private room	55	2	52	0	2	365
+...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...
+48858	36458668	2beds Private Room Step to LGA, CitiFiled, Mid...	217463199	Marvy	Queens	Flushing	40.74387	-73.82556	Private room	68	3	0	0	4	362
+48863	36469741	Comfortable & Big room with 2 beds!	274012871	Stefan	Queens	Long Island City	40.76726	-73.93936	Private room	93	2	0	0	2	14
+48866	36472710	CozyHideAway Suite	274225617	Alberth	Queens	Briarwood	40.70786	-73.81448	Entire home/apt	58	1	0	0	1	159
+48878	36479723	Room for rest	41326856	Jeerathinan	Queens	Elmhurst	40.74477	-73.87727	Private room	45	1	0	0	5	172
+48889	36484363	QUIT PRIVATE HOUSE	107716952	Michael	Queens	Jamaica	40.69137	-73.80844	Private room	65	1	0	0	2	163
+5567 rows × 15 columns
+In [79]:
+Airbnb_df[Airbnb_df['neighbourhood_group']=='Staten Island']
+Out[79]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	reviews_per_month	host_listings_count	availability_365
+169	42882	New York room with a view	185978	Newyorkroomwithaview	Staten Island	St. George	40.64524	-74.08088	Private room	70	2	166	1	1	312
+249	62452	A SpeciaL!! Private Room in NY	303939	Lissette	Staten Island	Tompkinsville	40.63536	-74.08537	Private room	36	2	193	1	6	360
+250	62461	B NYC Staten Alternative...	303939	Lissette	Staten Island	Tompkinsville	40.63627	-74.08543	Private room	37	2	147	1	6	0
+251	62787	C Private Room By The Ferry	303939	Lissette	Staten Island	Tompkinsville	40.63518	-74.08546	Private room	37	2	177	1	6	320
+256	63320	D Private Che@p Room 2 Explore NYC	303939	Lissette	Staten Island	Tompkinsville	40.63481	-74.08519	Private room	36	2	333	3	6	340
+...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...
+48401	36237529	Beautiful Cozy Room, 20mn to FREE ferry	272557707	Marouene	Staten Island	Rosebank	40.60750	-74.07979	Private room	65	1	1	1	1	179
+48441	36267546	A Home Away From Home	233485864	Jeannie	Staten Island	New Dorp Beach	40.56506	-74.10240	Private room	40	1	0	0	2	341
+48446	36270376	Beautiful home on Staten Island, walk to ferry	444904	Janine	Staten Island	St. George	40.64005	-74.07987	Entire home/apt	100	365	0	0	1	342
+48649	36355110	PRIVATE ROOM IN STATEN ISLAND -FOR LADIES ONLY	201187671	Tuana	Staten Island	Shore Acres	40.61283	-74.06625	Private room	54	4	0	0	1	89
+48799	36438336	Seas The Moment	211644523	Ben	Staten Island	Great Kills	40.54179	-74.14275	Private room	235	1	1	1	1	87
+365 rows × 15 columns
+observations Manhattan and Brooklyn have the highest number of listings on Airbnb, with over 19,000 listing each. Queens and the Bronx have significantly fewer listings compared to manhattan and Brooklyn, with 5,576 and 1070 listings, respectively Staten island has the fewest number of listings, with only 365 The distribution of listings across the different neighbourhood group is skewed, with a conecntration of listings in Manhatta and Brooklyn. Despite being larger in size, the neighbourhoods in Queeens , the Bronx, and States island have fewer listings on Airbnb compared to manhattan, which has a smaller geographical area. This could suggest that the demad for Airbnb rentals is higher in Manhattan compared to the other neighbourhoods, leading to a higher concentration of listings in this area. Alternatively, it could be that the supply of listings is higher in Manhattan due to a higher number of hometowns or property owners in this neighbourhood who are wiliing to list their properties on Airbnb.
+Average Price of Each Neighbourhood Group using Point Plot
+In [82]:
+from statistics import mean
+sns.set_theme(style='whitegrid')
+sns.pointplot(x='neighbourhood_group',y='price',data=Airbnb_df, estimator=np.mean)
+
+plt.xlabel('Neighbourhood Group', fontsize=14)
+plt.ylabel('Average Price', fontsize=14)
+plt.title('Average Price by Neighbourhood group', fontsize=15)
+plt.show()
+ 
+In [ ]:
+# Top hosts with more Listing/Property using Bar Chart
+In [83]:
+top_10_hosts= Airbnb_df['host_name'].value_counts()[:10].reset_index()
+top_10_hosts.columns=['host_name','Total_listings']
+top_10_hosts
+Out[83]:
+	host_name	Total_listings
+0	Michael	383
+1	David	368
+2	John	276
+3	Sonder (NYC)	272
+4	Alex	253
+5	Sarah	221
+6	Daniel	212
+7	Maria	197
+8	Jessica	185
+9	Mike	184
+In [84]:
+top_host=Airbnb_df['host_name'].value_counts()[:10]
+top_host.plot(kind='bar', color='blue',figsize=(12,8))
+plt.xlabel('top10_hosts', fontsize=14)
+plt.ylabel('total_NYC_listings', fontsize=14)
+plt.title('top 10 hosts on the basis of no of listings in entire NYC!', fontsize=15)
+Out[84]:
+Text(0.5, 1.0, 'top 10 hosts on the basis of no of listings in entire NYC!')
+ 
+Violinplot
+In [ ]:
+# Creating the violin plot for price distribution in each Neighbourhood_groups
+In [85]:
+sns.violinplot(x='neighbourhood_group', y='price',data=Airbnb_df)
+Out[85]:
+<Axes: xlabel='neighbourhood_group', ylabel='price'>
+ 
+In [86]:
+Airbnb_df.head()
+Out[86]:
+	listing_id	listing_name	host_id	host_name	neighbourhood_group	neighbourhood	latitude	longitude	room_type	price	minimum_nights	total_reviews	reviews_per_month	host_listings_count	availability_365
+0	2539	Clean & quiet apt home by the park	2787	John	Brooklyn	Kensington	40.64749	-73.97237	Private room	149	1	9	0	6	365
+1	2595	Skylit Midtown Castle	2845	Jennifer	Manhattan	Midtown	40.75362	-73.98377	Entire home/apt	225	1	45	0	2	355
+2	3647	THE VILLAGE OF HARLEM....NEW YORK !	4632	Elisabeth	Manhattan	Harlem	40.80902	-73.94190	Private room	150	3	0	0	1	365
+3	3831	Cozy Entire Floor of Brownstone	4869	LisaRoxanne	Brooklyn	Clinton Hill	40.68514	-73.95976	Entire home/apt	89	1	270	4	1	194
+4	5022	Entire Apt: Spacious Studio/Loft by central park	7192	Laura	Manhattan	East Harlem	40.79851	-73.94399	Entire home/apt	80	10	9	0	1	0
+In [87]:
+sns.barplot(x='neighbourhood_group',y='price',data=Airbnb_df)
+plt.show()
+ 
+In [88]:
+# Get the top 10 neighborhoods by listing count
+count_10=Airbnb_df['neighbourhood'].value_counts().nlargest(10)
+top_10_neighbourhood=count_10.reset_index()
+top_10_neighbourhood.columns=['neighbourhood','listing_count']
+top_10_neighbourhood
+Out[88]:
+	neighbourhood	listing_count
+0	Williamsburg	3732
+1	Bedford-Stuyvesant	3638
+2	Harlem	2585
+3	Bushwick	2438
+4	Upper West Side	1788
+5	Hell's Kitchen	1731
+6	East Village	1714
+7	Upper East Side	1670
+8	Crown Heights	1519
+9	Midtown	1143
+In [89]:
+top_10_neighbourhood=Airbnb_df['neighbourhood'].value_counts().nlargest(10)
+colors=['c', 'g', 'olive', 'y', 'm', 'orange', '#C0C0C0', '#800000', '#008000', '#000080']
+top_10_neighbourhood.plot(kind='bar',figsize=(13,8), color=colors)
+plt.xlabel('Neighbourhood',fontsize=14)
+plt.ylabel('Total Listing Counts', fontsize=14)
+plt.title('Listings by Top Neighborhoods in NYC', fontsize=15)
+Out[89]:
+Text(0.5, 1.0, 'Listings by Top Neighborhoods in NYC')
+ 
+Number Of Active Hosts Per Location Using Line Chart
+In [90]:
+host_per_location=Airbnb_df.groupby('neighbourhood_group')['listing_id'].count().reset_index()
+host_per_location.columns=['Neighbourhood_group','Host_counts']
+host_per_location
+Out[90]:
+	Neighbourhood_group	Host_counts
+0	Bronx	1070
+1	Brooklyn	19415
+2	Manhattan	19501
+3	Queens	5567
+4	Staten Island	365
+In [91]:
+Airbnb_df['neighbourhood_group'].unique()
+Out[91]:
+array(['Brooklyn', 'Manhattan', 'Queens', 'Staten Island', 'Bronx'],
+      dtype=object)
+In [94]:
+host_per_location=Airbnb_df.groupby('neighbourhood_group')['listing_id'].count()
+locations = host_per_location.index
+host_counts=host_per_location.values
+plt.figure(figsize=(10,4))
+plt.plot(locations, host_counts,marker='o',ms=8,mew=3, mec='r')   #ms-markersize, mew-MarkerEdgeWidth, mec-MarkerEdgeColour
+plt.xlabel('Location',fontsize=14)
+plt.ylabel('Number of Active Hosts', fontsize=14)
+plt.title('Number of Active Hosts per Location', fontsize=15)
+plt.show()
+ 
+Total Counts Of Each Room Type
+In [95]:
+Total_rooms=Airbnb_df['room_type'].value_counts().reset_index()
+Total_rooms.columns=['Room_type','Total_counts']
+Total_rooms
+Out[95]:
+	Room_type	Total_counts
+0	Entire home/apt	22784
+1	Private room	21996
+2	Shared room	1138
+In [ ]:
+#Pie Chart
+In [96]:
+plt.figure(figsize=(10,6))
+Total_rooms=Airbnb_df['room_type'].value_counts()
+labels=Total_rooms.index
+sizes=Total_rooms.values
+plt.pie(sizes,labels=labels,autopct='%1.1f%%')
+plt.legend(title='Room_type', bbox_to_anchor=(0.8,0,0.5,1), fontsize=12)
+plt.show()
+ 
+
 
 
 
